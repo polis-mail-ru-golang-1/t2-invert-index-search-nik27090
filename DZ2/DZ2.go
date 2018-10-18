@@ -16,7 +16,7 @@ import (
 	"fmt"
 	"sort"
 
-	"./funcs"
+	"github.com/polis-mail-ru-golang-1/t2-invert-index-search-nik27090/tree/master/DZ2/funcs"
 )
 
 func main() {
