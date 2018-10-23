@@ -98,7 +98,7 @@ func SortSearch(endMap map[string]int) {
 				bufName = nameFile[i]
 				nameFile[i] = nameFile[j]
 				nameFile[j] = bufName
-				bufCount = count[i]
+				bufCount = count[i] 
 				count[i] = count[j]
 				count[j] = bufCount
 			}
