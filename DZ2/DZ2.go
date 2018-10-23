@@ -1,44 +1,38 @@
-/*
-первый вариант
-map[string]map[string]int
-*/
-/*
-второй вариант
-struct around{
-	name string
-	count int
-}
-*/
-//сортировка мапы: перевести в слайс по макс значению
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"sort"
+	"io/ioutil"
+	"os"
+	"strings"
 
-	"./funcs"
+	"github.com/polis-mail-ru-golang-1/t2-invert-index-search-nik27090/DZ2/funcs"
 )
 
 func main() {
-	files := funcs.OpenFiles()
+	//срез файлов(название и содержание)
+	files := openFiles()
 
-	//ввод поисковой фразы и инвертирование в срез
-	phrases := funcs.СreatePhrase()
+	//ввод фразы с консоли, создание среза
+	phrases := createPhrase()
 
-	//интвертированный индекс
-	funcs.CountAndII(phrases, files)
+	//инвертированный индекс
+	inIn := funcs.InvertIndex(files)
 
-	//чем больше слов из фразы встретилось в фале тем он выше, кол-во одного и того же слова не учитывается
-	sort.Slice(files, func(i, j int) bool { return files[i].Times > files[j].Times })
+	//срез с файлами в которых поисковая фраза содержиться полностью
+	end := funcs.Find(inIn, phrases, files)
 
-	for i := range files {
-		if files[i].Times > 0 {
-			fmt.Println(files[i].Name, "; совпадений - ", files[i].Times)
-		}
+	//сортировка файлов по большему кол-ву сопадений
+	funcs.SortSearch(end)
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
 	}
 }
 
-/*
 func scanStr() string {
 	in := bufio.NewScanner(os.Stdin)
 	in.Scan()
@@ -47,59 +41,22 @@ func scanStr() string {
 	}
 	return in.Text()
 }
-*/
-/*
-type fileIndexer struct {
-	index   int
-	name    string
-	content string
-	times   int
-}
-*/
-/*
-func openFiles() []funcs.FileIndexer {
+
+func openFiles() []funcs.File {
 	fileNames := os.Args[1:]
-	sliceFiles := make([]funcs.FileIndexer, 0)
-	for i, names := range fileNames {
+	sliceFiles := make([]funcs.File, 0)
+	for _, names := range fileNames {
 		file, err := ioutil.ReadFile(names)
-		funcs.Check(err)
-		f := funcs.FileIndexer{Index: i, Name: names, Content: string(file)}
+		check(err)
+		f := funcs.File{Name: names, Content: string(file)}
 		sliceFiles = append(sliceFiles, f)
 	}
 	return sliceFiles
 }
-*/
-/*func сheck(e error) {
-	if e != nil {
-		panic(e)
-	}
-}*/
-/*
+
 func createPhrase() []string {
 	fmt.Println("Введите фразу:")
 	phrase := scanStr()
 	slicePhrase := strings.Split(phrase, " ")
 	return slicePhrase
 }
-*/
-//var InvertIndex = map[string][]int{}
-/*
-func countAndII(sliceStr []string, sliceFiles []fileIndexer) {
-	var c int
-	for _, vol := range sliceStr {
-		index := make([]int, 0)
-		j := 0
-		for i := range sliceFiles {
-			c = strings.Count(sliceFiles[i].content, vol)
-			if c > 0 {
-				index = append(index, i)
-				j++
-				sliceFiles[i].times++
-			}
-		}
-		if j > 0 {
-			invertIndex[vol] = index
-		}
-	}
-}
-*/
