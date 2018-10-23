@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"./funcs"
+	"github.com/polis-mail-ru-golang-1/t2-invert-index-search-nik27090/DZ2/funcs"
 )
 
 func main() {
