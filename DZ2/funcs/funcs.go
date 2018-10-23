@@ -1,53 +1,16 @@
 package funcs
 
 import (
-	"bufio"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"strings"
 )
 
-type FileIndexer struct {
+type File struct {
 	Name    string
 	Content string
 }
 
-func OpenFiles() []FileIndexer {
-	fileNames := os.Args[1:]
-	sliceFiles := make([]FileIndexer, 0)
-	for _, names := range fileNames {
-		file, err := ioutil.ReadFile(names)
-		Check(err)
-		f := FileIndexer{Name: names, Content: string(file)}
-		sliceFiles = append(sliceFiles, f)
-	}
-	return sliceFiles
-}
-
-func Check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
-func СreatePhrase() []string {
-	fmt.Println("Введите фразу:")
-	phrase := ScanStr()
-	slicePhrase := strings.Split(phrase, " ")
-	return slicePhrase
-}
-
-func ScanStr() string {
-	in := bufio.NewScanner(os.Stdin)
-	in.Scan()
-	if err := in.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "Ошибка ввода:", err)
-	}
-	return in.Text()
-}
-
-func InvertIndex(sliceFiles []FileIndexer) map[string]map[string]int {
+func InvertIndex(sliceFiles []File) map[string]map[string]int {
 	InIn := make(map[string]map[string]int)
 	for _, f := range sliceFiles {
 		sliceStrFile := strings.Split(f.Content, " ")
@@ -64,7 +27,7 @@ func InvertIndex(sliceFiles []FileIndexer) map[string]map[string]int {
 	return InIn
 }
 
-func Find(inIn map[string]map[string]int, phrase []string, sliceFiles []FileIndexer) map[string]int {
+func Find(inIn map[string]map[string]int, phrase []string, sliceFiles []File) map[string]int {
 	phWords := haveWord(inIn, phrase)
 	goodFile := takeGoodFile(inIn, sliceFiles, phrase)
 	endMap := make(map[string]int)
@@ -95,7 +58,7 @@ func haveWord(inIn map[string]map[string]int, phrase []string) map[string]map[st
 }
 
 //создает срез файлов имеющих поисковую фразу полностью
-func takeGoodFile(inIn map[string]map[string]int, sliceFiles []FileIndexer, phrase []string) []string {
+func takeGoodFile(inIn map[string]map[string]int, sliceFiles []File, phrase []string) []string {
 	s := 0
 	goodFile := make([]string, 0)
 	for _, file := range sliceFiles {
@@ -144,5 +107,4 @@ func SortSearch(endMap map[string]int) {
 	for i := 0; i < len(nameFile); i++ {
 		fmt.Println("Файл:", nameFile[i], "; совпадений:", count[i])
 	}
-}
 }
