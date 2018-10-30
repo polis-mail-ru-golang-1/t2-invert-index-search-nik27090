@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 	"sync"
-	
+
 	"github.com/polis-mail-ru-golang-1/t2-invert-index-search-nik27090/DZ2/funcs"
 )
 
@@ -23,11 +23,10 @@ func main() {
 	//инвертированный индекс
 	var wg sync.WaitGroup
 	wg.Add(len(files))
+	var mutex sync.Mutex
 
-	ch := make(chan int, 1)
-	ch <- 1
 	for i := 0; i < len(files); i++ {
-		go funcs.InvertIndexGo(inIn, files[i].Name, files[i].Content, &wg, &ch)
+		go funcs.InvertIndexGo(inIn, files[i].Name, files[i].Content, &wg, &mutex)
 	}
 
 	wg.Wait()
@@ -73,4 +72,3 @@ func createPhrase() []string {
 	slicePhrase := strings.Split(phrase, " ")
 	return slicePhrase
 }
-
