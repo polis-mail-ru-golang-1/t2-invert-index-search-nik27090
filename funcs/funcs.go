@@ -11,10 +11,10 @@ type File struct {
 	Content string
 }
 
-func InvertIndexGo(inIn map[string]map[string]int, name string, content string, wg *sync.WaitGroup, ch *chan int) {
+func InvertIndexGo(inIn map[string]map[string]int, name string, content string, wg *sync.WaitGroup, mutex *sync.Mutex) {
 	StrFile := splitTrim(content)
-	<-*ch
 	for _, word := range StrFile {
+		mutex.Lock()
 		_, ok := inIn[word]
 		if !ok {
 			fileMap := make(map[string]int)
@@ -23,8 +23,8 @@ func InvertIndexGo(inIn map[string]map[string]int, name string, content string, 
 		} else {
 			inIn[word][name]++
 		}
+		mutex.Unlock()
 	}
-	*ch <- 1
 	wg.Done()
 }
 
