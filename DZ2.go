@@ -23,6 +23,7 @@ func main() {
 	//инвертированный индекс
 	var wg sync.WaitGroup
 	wg.Add(len(files))
+
 	var mutex sync.Mutex
 
 	for i := 0; i < len(files); i++ {
@@ -72,3 +73,4 @@ func createPhrase() []string {
 	slicePhrase := strings.Split(phrase, " ")
 	return slicePhrase
 }
+
