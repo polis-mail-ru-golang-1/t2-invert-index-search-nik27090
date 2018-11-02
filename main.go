@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"./invertIndex"
+	"github.com/polis-mail-ru-golang-1/t2-invert-index-search-nik27090/invertIndex/"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
