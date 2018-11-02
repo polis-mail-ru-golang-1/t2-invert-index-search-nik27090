@@ -3,6 +3,7 @@ package funcs
 import (
 	"fmt"
 	"strings"
+	"sync"
 )
 
 type File struct {
@@ -10,21 +11,38 @@ type File struct {
 	Content string
 }
 
-func InvertIndex(sliceFiles []File) map[string]map[string]int {
-	InIn := make(map[string]map[string]int)
-	for _, f := range sliceFiles {
-		sliceStrFile := strings.Split(f.Content, " ")
-		for _, word := range sliceStrFile {
-			if InIn[word] == nil {
-				fileMap := make(map[string]int)
-				fileMap[f.Name]++
-				InIn[word] = fileMap
-			} else {
-				InIn[word][f.Name]++
-			}
+func InvertIndexGo(inIn map[string]map[string]int, name string, content string, wg *sync.WaitGroup, mutex *sync.Mutex) {
+	StrFile := splitTrim(content)
+	for _, word := range StrFile {
+		mutex.Lock()
+		_, ok := inIn[word]
+		if !ok {
+			fileMap := make(map[string]int)
+			fileMap[name]++
+			inIn[word] = fileMap
+		} else {
+			inIn[word][name]++
+		}
+		mutex.Unlock()
+	}
+	wg.Done()
+}
+
+func splitTrim(in string) []string {
+	words := strings.Split(in, " ")
+	for i := 0; i < len(words); i++ {
+		words[i] = strings.ToLower(words[i])
+		words[i] = strings.TrimSpace(words[i])
+		words[i] = strings.TrimFunc(words[i], func(r rune) bool {
+			return ((r >= 0 && r <= 64) || (r >= 91 && r <= 96) || (r >= 123))
+		})
+
+		if words[i] == "" {
+			words = append(words[:i], words[i+1:]...)
+			i--
 		}
 	}
-	return InIn
+	return words
 }
 
 func Find(inIn map[string]map[string]int, phrase []string, sliceFiles []File) map[string]int {

@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 	"sync"
-	
+
 	"github.com/polis-mail-ru-golang-1/t2-invert-index-search-nik27090/DZ2/funcs"
 )
 
@@ -24,10 +24,10 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(len(files))
 
-	ch := make(chan int, 1)
-	ch <- 1
+	var mutex sync.Mutex
+
 	for i := 0; i < len(files); i++ {
-		go funcs.InvertIndexGo(inIn, files[i].Name, files[i].Content, &wg, &ch)
+		go funcs.InvertIndexGo(inIn, files[i].Name, files[i].Content, &wg, &mutex)
 	}
 
 	wg.Wait()
