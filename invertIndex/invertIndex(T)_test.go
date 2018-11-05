@@ -5,17 +5,20 @@ import (
 	"testing"
 )
 
+//go test -coverprofile=cover.out
+
 var sliceFiles = make([]File, 0)
 var name = "f1.txt"
 var content = "Hi, how are you, and you, and you?"
 var sliceText []string
+var expected map[string]map[string]int
 
 func TestPreInvertIndex(t *testing.T) {
 
-	strings.ToLower(content)
-	sliceText = strings.Split(content, " ")
+	text := strings.ToLower(content)
+	sliceText = strings.Fields(text)
 
-	sliceFiles = append(sliceFiles, File{Name: name, Content: "Hi, how are you, and you, and you?"})
+	sliceFiles = append(sliceFiles, File{Name: name, Content: content})
 	actual := PreInvertIndex(sliceFiles)
 
 	var m1 = map[string]int{
@@ -27,7 +30,7 @@ func TestPreInvertIndex(t *testing.T) {
 	var m3 = map[string]int{
 		name: 3,
 	}
-	var expected = map[string]map[string]int{
+	expected = map[string]map[string]int{
 		"hi":  m1,
 		"how": m1,
 		"are": m1,
@@ -47,7 +50,8 @@ func testPreInvertIndex(a, b map[string]map[string]int, name string) bool {
 	}
 
 	for _, vol := range sliceText {
-		if a[vol][name] != b[vol][name] {
+		word := strings.Trim(vol, "().,?!-")
+		if a[word][name] != b[word][name] {
 			return false
 		}
 	}
