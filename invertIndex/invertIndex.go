@@ -44,9 +44,10 @@ func invertIndexGo(inIn map[string]map[string]int, name string, content string, 
 }
 
 func splitTrim(in string) []string {
-	words := strings.Fields(in)
+	lowWords := strings.ToLower(in)
+	words := strings.Fields(lowWords)
 	for i := 0; i < len(words); i++ {
-		words[i] = strings.Trim(words[i], "/.,?!-\"")
+		words[i] = strings.Trim(words[i], "()/.,?!-\"")
 		if words[i] == "" {
 			words = append(words[:i], words[i+1:]...)
 			i--
