@@ -7,11 +7,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/polis-mail-ru-golang-1/t2-invert-index-search-nik27090/invertIndex/"
+	"./invertIndex"
 )
 
+var inIn map[string]map[string]int
+var sliceFiles []invertIndex.File
+
 func handler(w http.ResponseWriter, r *http.Request) {
-	inIn, sliceFiles := openFiles(w)
 
 	q := r.FormValue("q")
 	if q != "" {
@@ -21,6 +23,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	inIn, sliceFiles = openFiles()
+
 	http.HandleFunc("/search", handler)
 	fmt.Println("Server is listening...")
 	http.ListenAndServe("127.0.0.1:8080", nil)
@@ -32,16 +36,12 @@ func check(e error) {
 	}
 }
 
-func openFiles(w http.ResponseWriter) (map[string]map[string]int, []invertIndex.File) {
+func openFiles() (map[string]map[string]int, []invertIndex.File) {
 	sliceFiles := make([]invertIndex.File, 0)
 	directoryFiles := os.Args[1]
 
 	sliceFileInfo, err := ioutil.ReadDir(directoryFiles)
 	check(err)
-
-	if len(sliceFileInfo) == 0 {
-		fmt.Fprintf(w, "Files not found\n")
-	}
 
 	for i := 0; i < len(sliceFileInfo); i++ {
 		dirFile := directoryFiles + "/" + sliceFileInfo[i].Name()
@@ -108,10 +108,6 @@ func takeGoodFile(inIn map[string]map[string]int, sliceFiles []invertIndex.File,
 }
 
 func sortSearch(endMap map[string]int, w http.ResponseWriter) {
-	if len(endMap) == 0 {
-		fmt.Fprintf(w, "По вашему запросу ничего не найдено")
-		return
-	}
 	bufName := ""
 	bufCount := 0
 	nameFile := make([]string, 0)
@@ -136,5 +132,3 @@ func sortSearch(endMap map[string]int, w http.ResponseWriter) {
 		fmt.Fprintf(w, "- %s; совпадений - %d\n", nameFile[i], count[i])
 	}
 }
-
-
