@@ -1,33 +1,102 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"./invertIndex"
+	"go.uber.org/zap"
 )
 
-var inIn map[string]map[string]int
 var sliceFiles []invertIndex.File
 
-func handler(w http.ResponseWriter, r *http.Request) {
+type config struct {
+	Address string
+	Direct  string
+}
+
+type result struct {
+	Name  string
+	Count int
+}
+
+type AccessLogger struct {
+	ZapLogger *zap.SugaredLogger
+}
+
+func searchPage(w http.ResponseWriter, r *http.Request) {
 
 	q := r.FormValue("q")
+	zap.S().Info("Search phrase: ", q)
 	if q != "" {
-		endMap := find(inIn, q, sliceFiles)
-		sortSearch(endMap, w)
+		endMap := find(invertIndex.InIn, q, sliceFiles)
+		endSlice := sortSearch(endMap, w)
+		tmpl := template.Must(template.ParseFiles("html/output.html", "html/dynamicList.html"))
+		tmpl.Execute(w, endSlice)
+	} else {
+		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }
 
-func main() {
-	inIn, sliceFiles = openFiles()
+func mainPage(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("html/index.html"))
+	tmpl.Execute(w, nil)
+}
 
-	http.HandleFunc("/search", handler)
-	fmt.Println("Server is listening...")
-	http.ListenAndServe("127.0.0.1:8080", nil)
+func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+
+		ac.ZapLogger.Info(
+			zap.String("URL", r.URL.Path),
+			zap.String("method", r.Method),
+			zap.String("remote_addr", r.RemoteAddr),
+			zap.Duration("work_time", time.Since(start)),
+		)
+	})
+}
+
+func main() {
+	//config
+	conf, _ := os.Open("config.json")
+	defer conf.Close()
+	decoder := json.NewDecoder(conf)
+	config := config{}
+	err := decoder.Decode(&config)
+	check(err)
+
+	// zap
+	zapLogger, err := zap.NewProduction()
+	defer zapLogger.Sync()
+	check(err)
+	zap.ReplaceGlobals(zapLogger)
+
+	zapLogger.Info("server is started",
+		zap.String("address", config.Address),
+	)
+
+	AccessLogOut := new(AccessLogger)
+
+	sugar := zapLogger.Sugar().With()
+	AccessLogOut.ZapLogger = sugar
+
+	// server stuff
+	siteMux := http.NewServeMux()
+	siteHandler := AccessLogOut.accessLogMiddleware(siteMux)
+
+	invertIndex.InIn, sliceFiles = openFiles(config.Direct)
+	zap.S().Info("InvertIndex built.")
+
+	siteMux.HandleFunc("/search", searchPage)
+	siteMux.HandleFunc("/", mainPage)
+	http.ListenAndServe(config.Address, siteHandler)
+
 }
 
 func check(e error) {
@@ -36,26 +105,32 @@ func check(e error) {
 	}
 }
 
-func openFiles() (map[string]map[string]int, []invertIndex.File) {
+func openFiles(dir string) (map[string]map[string]int, []invertIndex.File) {
 	sliceFiles := make([]invertIndex.File, 0)
-	directoryFiles := os.Args[1]
 
-	sliceFileInfo, err := ioutil.ReadDir(directoryFiles)
+	sliceFileInfo, err := ioutil.ReadDir(dir)
 	check(err)
-
 	for i := 0; i < len(sliceFileInfo); i++ {
-		dirFile := directoryFiles + "/" + sliceFileInfo[i].Name()
+		dirFile := dir + "/" + sliceFileInfo[i].Name()
 		textFile, err := ioutil.ReadFile(dirFile)
 		check(err)
 		f := invertIndex.File{Name: sliceFileInfo[i].Name(), Content: string(textFile)}
 		sliceFiles = append(sliceFiles, f)
+		zap.S().Info("File opened: ", sliceFileInfo[i].Name())
 	}
 	return invertIndex.PreInvertIndex(sliceFiles), sliceFiles
 }
 
 func find(inIn map[string]map[string]int, q string, sliceFiles []invertIndex.File) map[string]int {
 	q = strings.ToLower(q)
-	phrase := strings.Split(q, " ")
+	phrase := strings.Fields(q)
+	for i := 0; i < len(phrase); i++ {
+		phrase[i] = strings.Trim(phrase[i], "()/.,?!-\"")
+		if phrase[i] == "" {
+			phrase = append(phrase[:i], phrase[i+1:]...)
+			i--
+		}
+	}
 	phWords := mapWithQWord(inIn, phrase)
 	goodFile := takeGoodFile(inIn, sliceFiles, phrase)
 	endMap := make(map[string]int)
@@ -107,7 +182,7 @@ func takeGoodFile(inIn map[string]map[string]int, sliceFiles []invertIndex.File,
 	return goodFile
 }
 
-func sortSearch(endMap map[string]int, w http.ResponseWriter) {
+func sortSearch(endMap map[string]int, w http.ResponseWriter) []result {
 	bufName := ""
 	bufCount := 0
 	nameFile := make([]string, 0)
@@ -128,7 +203,11 @@ func sortSearch(endMap map[string]int, w http.ResponseWriter) {
 			}
 		}
 	}
+	nameCount := make([]result, 0)
 	for i := 0; i < len(nameFile); i++ {
-		fmt.Fprintf(w, "- %s; совпадений - %d\n", nameFile[i], count[i])
+		f := result{Name: nameFile[i], Count: count[i]}
+		nameCount = append(nameCount, f)
 	}
+	return nameCount
 }
+
