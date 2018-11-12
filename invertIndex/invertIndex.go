@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+var InIn map[string]map[string]int
+
 type File struct {
 	Name    string
 	Content string
@@ -55,3 +57,4 @@ func splitTrim(in string) []string {
 	}
 	return words
 }
+
