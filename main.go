@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"./invertIndex"
+	"github.com/polis-mail-ru-golang-1/t2-invert-index-search-nik27090/HW5/invertIndex"
 	"go.uber.org/zap"
 )
 
