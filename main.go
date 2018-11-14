@@ -5,21 +5,13 @@ import (
 	"net/http"
 	"os"
 	"time"
-
+	
+	"./config"
 	"./handlers"
 	"./invertIndex"
 	"github.com/go-pg/pg"
 	"go.uber.org/zap"
 )
-
-type Config struct {
-	ServerAddress string
-	Direct        string
-	Addr          string
-	Username      string
-	Pass          string
-	DB            string
-}
 
 type AccessLogger struct {
 	ZapLogger *zap.SugaredLogger
@@ -41,13 +33,7 @@ func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 
 func main() {
 	//config
-	conf, err := os.Open("config.json")
-	check(err)
-	defer conf.Close()
-	decoder := json.NewDecoder(conf)
-	config := Config{}
-	err = decoder.Decode(&config)
-	check(err)
+	config := config.Load()
 
 	// zap
 	zapLogger, err := zap.NewProduction()
