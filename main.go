@@ -1,11 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
-	"os"
 	"time"
-	
+
 	"./config"
 	"./handlers"
 	"./invertIndex"
@@ -65,7 +63,6 @@ func main() {
 
 	invertIndex.InIn, invertIndex.SliceFiles = invertIndex.OpenFiles(config.Direct)
 	zap.S().Info("InvertIndex built.")
-
 	siteMux.HandleFunc("/search", handlers.SearchPage)
 	siteMux.HandleFunc("/", handlers.MainPage)
 	siteMux.HandleFunc("/add", handlers.AddPage)

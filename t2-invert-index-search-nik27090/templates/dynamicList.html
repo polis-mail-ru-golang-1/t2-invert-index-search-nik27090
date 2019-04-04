@@ -1,0 +1,12 @@
+{{define "result"}}
+<br><br><br><br>
+    {{if not .}}
+        <font face="arial" size="+4" color="#1e90ff">Phrase not found</font>
+    {{else}}
+        <font face="arial" size="+4" color="#1e90ff">Result</font>
+        <br>
+        {{range .}}
+        <font face="arial">In file "<font size="+1" color="#1e90ff">{{.Name}}</font>" {{.Count}} matches</font><br>
+        {{end}}
+    {{end}}   
+{{end}} 

@@ -1,0 +1,8 @@
+{
+    "ServerAddress":"127.0.0.1:8080",
+    "Direct":"./search",
+    "Addr":"51.15.112.136:5432",
+    "Username": "nik27090",
+	"Pass": "qwedfgq3",
+	"DB": "nik27090_db"
+}

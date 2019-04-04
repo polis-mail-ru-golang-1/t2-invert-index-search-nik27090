@@ -1,10 +1,11 @@
 package invertIndex
 
 import (
-	"fmt"
 	"io/ioutil"
 	"testing"
 )
+
+// go test -benchmem -bench .
 
 var sliceFiles2 []File
 

@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <title>resultPage</title>
+    </head>
+        <style type="text/css">
+            TABLE {
+            width:100%; 
+            height: 60%;  
+            } 
+        </style>
+            <body>
+                <table>
+                    <tr>
+                        <td align="center">
+                            <div class="search">
+                                <form action="/search" method="get">
+                                    <a href="/" title="Main Page"><img src="https://upload.wikimedia.org/wikipedia/commons/0/04/S-Bahn-Logo_Salzburg.png" width="50" height="50"></a>
+                                    <input name="q" placeholder="Your phrase" type="text">
+                                    <button type="submit">Go</button>
+                                    {{template "result" .}}
+                                </form> 
+                            </div>
+                        </td>
+                    </tr>
+                </table> 
+            </body>
+</html>
+    
