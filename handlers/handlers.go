@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"../invertIndex"
+
 	"go.uber.org/zap"
 )
 
@@ -37,6 +38,6 @@ func SearchPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func MainPage(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("html/mainPage.html"))
+	tmpl := template.Must(template.ParseFiles("templates/mainPage.html"))
 	tmpl.Execute(w, nil)
 }

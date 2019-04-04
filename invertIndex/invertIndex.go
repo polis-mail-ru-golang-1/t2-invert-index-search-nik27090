@@ -181,4 +181,3 @@ func splitTrim(in string) []string {
 	}
 	return words
 }
-
